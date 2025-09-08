@@ -151,6 +151,14 @@ public class Order
         Description = "The order was cancelled.";
         AddDomainEvent(new OrderCancelledDomainEvent(this));
     }
+    public void SetCompletedStatus()
+    {
+        if (OrderStatus == OrderStatus.Cancelled)
+        {
+            StatusChangeException(OrderStatus.Completed);
+        }
+        OrderStatus = OrderStatus.Completed;
+    }
 
     public void SetCancelledStatusWhenStockIsRejected(IEnumerable<int> orderStockRejectedItems)
     {

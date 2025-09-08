@@ -158,12 +158,16 @@
                 },
                 new Client
                 {
-                    ClientId = "orderingswaggerui",
+                    ClientId = "orderingswaggerui", 
                     ClientName = "Ordering Swagger UI",
                     AllowedGrantTypes = GrantTypes.Implicit,
                     AllowAccessTokensViaBrowser = true,
 
-                    RedirectUris = { $"{configuration["OrderingApiClient"]}/swagger/oauth2-redirect.html" },
+                    RedirectUris =
+                    {
+                        $"{configuration["OrderingApiClient"]}/swagger/oauth2-redirect.html",
+                        $"{configuration["OrderingApiClient"]}/scalar/v1" // <-- BU SATIRI BURAYA EKLEYİN
+                    },
                     PostLogoutRedirectUris = { $"{configuration["OrderingApiClient"]}/swagger/" },
 
                     AllowedScopes =
@@ -171,21 +175,6 @@
                         "orders"
                     }
                 },
-                new Client
-                {
-                    ClientId = "webhooksswaggerui",
-                    ClientName = "WebHooks Service Swagger UI",
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    AllowAccessTokensViaBrowser = true,
-
-                    RedirectUris = { $"{configuration["WebhooksApiClient"]}/swagger/oauth2-redirect.html" },
-                    PostLogoutRedirectUris = { $"{configuration["WebhooksApiClient"]}/swagger/" },
-
-                    AllowedScopes =
-                    {
-                        "webhooks"
-                    }
-                }
             };
         }
     }

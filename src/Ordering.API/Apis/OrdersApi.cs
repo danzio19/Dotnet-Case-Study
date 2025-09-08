@@ -11,12 +11,43 @@ public static class OrdersApi
         api.MapPut("/cancel", CancelOrderAsync);
         api.MapPut("/ship", ShipOrderAsync);
         api.MapGet("{orderId:int}", GetOrderAsync);
+        api.MapPut("/{orderId:int}/complete", CompleteOrderAsync);
         api.MapGet("/", GetOrdersByUserAsync);
         api.MapGet("/cardtypes", GetCardTypesAsync);
         api.MapPost("/draft", CreateOrderDraftAsync);
         api.MapPost("/", CreateOrderAsync);
 
         return api;
+    }
+
+    public static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> CompleteOrderAsync(
+        int orderId,
+        [FromHeader(Name = "x-requestid")] Guid requestId,
+        [AsParameters] OrderServices services)
+    {
+        if (requestId == Guid.Empty)
+        {
+            return TypedResults.BadRequest("Empty GUID is not valid for request ID");
+        }
+
+        var completeOrderCommand = new CompleteOrderCommand(orderId);
+        var requestCompleteOrder = new IdentifiedCommand<CompleteOrderCommand, bool>(completeOrderCommand, requestId);
+
+        services.Logger.LogInformation(
+            "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+            requestCompleteOrder.GetGenericTypeName(),
+            nameof(requestCompleteOrder.Command.OrderNumber),
+            requestCompleteOrder.Command.OrderNumber,
+            requestCompleteOrder);
+
+        var commandResult = await services.Mediator.Send(requestCompleteOrder);
+
+        if (!commandResult)
+        {
+            return TypedResults.Problem(detail: "Complete order failed to process.", statusCode: 500);
+        }
+
+        return TypedResults.Ok();
     }
 
     public static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> CancelOrderAsync(
